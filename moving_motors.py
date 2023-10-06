@@ -30,8 +30,8 @@ def main():
         arya, bran = players_init(players)
 
         # Move Device to a new position:
-        arya.set_meas_basis("Z")
-        bran.set_meas_basis("Z")
+        arya.set_meas_basis("z")
+        bran.set_meas_basis("z")
 
         # # Stop polling and close devices
         arya.off()

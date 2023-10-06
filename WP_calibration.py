@@ -10,10 +10,10 @@ def main():
         ##################################################################
         CHANNELS = [2, 4]
         TRIGGER = [0.13, 0.13]
-        DELAY = [-850, -1550]
-        tt = TT.Swabian(CHANNELS, TRIGGER, DELAY, "Arya_hwp")
+        DELAY = [-850, -11880]
+        tt = TT.Swabian(CHANNELS, TRIGGER, DELAY, "Bran_hwp")
 
-        AQUISITION_TIME = int(6E12) # in picosecond
+        AQUISITION_TIME = int(5E12) # in picosecond
         N_REP = 1
         GROUPS = [(2,4)]
         COINCIDENCE_WINDOW = 200 # in picosecond
@@ -21,11 +21,11 @@ def main():
         ##################################################################
         ##################### DEFINING THE PLAYERS #######################
         ##################################################################
-        players = ["arya"]
+        players = ["bran"]
 
         # Create new device, Connect, begin polling, and enable
         arya = players_init(players)[0]
-        meas_angles = np.linspace(-90,90,181)
+        meas_angles = np.linspace(-90,90,91)
 
         ##########################################################
         ############### START MEASUREMENTS #######################
