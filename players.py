@@ -30,8 +30,8 @@ SERIAL_NO = {
 # This is necessary to make sure both WP's in the same measurement station are algined and than we can more easily be self-consistent
 WP_ZEROS =  {
                 "ARYA": {"HWP": 179.7273, "QWP": 244.86249},
-                "BRAN": {"HWP": 23.34714, "QWP": 75.63},
-                "CERSEI": {"HWP": 323.775, "QWP": 78.815},
+                "BRAN": {"HWP": 178.8840, "QWP": 86.4759},
+                "CERSEI": {"HWP": 175.6039, "QWP": 74.8664},
                 "DANY": {"HWP": 37.0029, "QWP": 35.2849},
             }
 
