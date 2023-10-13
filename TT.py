@@ -4,7 +4,7 @@ import TimeTagger
 from datetime import datetime
 
 class Swabian:
-    def __init__(self, CHANNELS, TRIGGER, DELAY, FOLDER_1):#, FOLDER_2=None):
+    def __init__(self, CHANNELS, TRIGGER, DELAY, FOLDER):#, FOLDER_2=None):
         ### Setting the general parameter for the TT measurement ###
         self.tagger = TimeTagger.createTimeTagger()
         self.channels = CHANNELS
@@ -18,7 +18,7 @@ class Swabian:
             # tagger.setTestSignal(inp, True) # Comment if we want a real measurement
         ### Saving a time stamp to use in the filename to avoid overwriting data ###
         self.filestamp=datetime.now().strftime('%Y%m%d%H%M%S')
-        TYPE = f"\{FOLDER_1}_" + str(self.filestamp)
+        TYPE = f"\{FOLDER}_" + str(self.filestamp)
         self.data_dir = os.getcwd()+"\Data"+TYPE
 
         ### This is useful to calibrate Two WP's at the same time
