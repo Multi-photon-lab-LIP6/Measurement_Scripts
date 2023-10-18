@@ -22,11 +22,6 @@ from System import Decimal
 # We define the serial numbers corresponding to Linear Translation Stage
 SERIAL_NO = "40381974"
 
-"""
-This class Connects, begins polling, and enables, moves to new position, stops polling and closes devices associated with each player
-The devices correspond to a HWP and to a QWP
-"""
-
 class Delay:
     def __init__(self):
         # Build device list so that the library can find yours

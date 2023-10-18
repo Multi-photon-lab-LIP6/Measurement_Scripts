@@ -3,7 +3,7 @@ import itertools
 
 import TT
 
-from players import players_init
+import motors_control
 
 def main():
     try:
@@ -13,9 +13,9 @@ def main():
         CHANNELS = [1, 2, 3, 4, 5, 6, 7, 8]
         TRIGGER = [0.13, 0.13, 0.13, 0.13, 0.13, 0.13, 0.13, 0.13]
         DELAY = [0, -816, -30210, -36547, -36173, -34046, -526, -1418]
-        tt = TT.Swabian(CHANNELS, TRIGGER, DELAY, "QST_GHZ")
+        tt = TT.Swabian(CHANNELS, TRIGGER, DELAY, "QST", "QST_GHZ")
 
-        AQUISITION_TIME = int(2*60E12) # in picosecond
+        AQUISITION_TIME = int(7*60E12) # in picosecond
         N_REP = 1
         """
         Defining the coincidence channels we want to save
@@ -33,13 +33,14 @@ def main():
         players = ["arya", "bran", "cersei", "dany"]
 
         # Create new device, Connect, begin polling, and enable
-        arya, bran, cersei, dany = players_init(players)
+        arya, bran, cersei, dany = motors_control.players_init(players)
 
         # Setting the measurmenet basis we want to measure
         elem_bases = ["x","y","z"]
         meas_bases = list(itertools.product(elem_bases, repeat=4))
-        # Adding to meas_basis to compensatecalculate correction factor that compensates for the different efficiencies in the different paths, detectors, etc
-        eff_list = [("z","z","z","z"),("z","a","z","a"),("a","z","a","z"),("a","a","a","a")]
+        # # Adding to meas_basis to compensatecalculate correction factor that compensates for the different efficiencies in the different paths, detectors, etc
+        eff_bases = ["z","a"]
+        eff_list = list(itertools.product(eff_bases, repeat=4))
         meas_bases=meas_bases+eff_list
 
         ##########################################################

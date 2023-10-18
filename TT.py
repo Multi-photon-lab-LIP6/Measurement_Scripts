@@ -4,7 +4,7 @@ import TimeTagger
 from datetime import datetime
 
 class Swabian:
-    def __init__(self, CHANNELS, TRIGGER, DELAY, FOLDER):#, FOLDER_2=None):
+    def __init__(self, CHANNELS, TRIGGER, DELAY, FOLDER, FILE):#, FOLDER_2=None):
         ### Setting the general parameter for the TT measurement ###
         self.tagger = TimeTagger.createTimeTagger()
         self.channels = CHANNELS
@@ -18,14 +18,14 @@ class Swabian:
             # tagger.setTestSignal(inp, True) # Comment if we want a real measurement
         ### Saving a time stamp to use in the filename to avoid overwriting data ###
         self.filestamp=datetime.now().strftime('%Y%m%d%H%M%S')
-        TYPE = f"\{FOLDER}_" + str(self.filestamp)
-        self.data_dir = os.getcwd()+"\Data"+TYPE
+        TYPE = f"\{FILE}_" + str(self.filestamp)
+        self.data_dir = r"C:\\Users\\Experience\Desktop\\Multipartite Entanglement Experiment\\Data"+f"\\{FOLDER}"+TYPE
 
         ### This is useful to calibrate Two WP's at the same time
         # if FOLDER_2 is not None:
         #     self.folder_2=True
         #     TYPE_2 = f"\{FOLDER_2}_" + str(self.filestamp)
-        #     self.data_dir_2 = os.getcwd()+"\Data"+TYPE_2
+        #     self.data_dir_2 = r"C:\\Users\\Experience\Desktop\\Multipartite Entanglement Experiment\\Data"+f"\\{FOLDER}"+TYPE_2
 
     """
     measure():

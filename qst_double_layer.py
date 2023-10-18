@@ -3,7 +3,7 @@ import itertools
 
 import TT
 
-from players import players_init
+import motors_control
 
 def main():
     try:
@@ -13,7 +13,7 @@ def main():
         CHANNELS = [1 ,2 ,3, 4, 5, 6, 7, 8]
         TRIGGER = [0.13, 0.13, 0.13, 0.13, 0.13, 0.13, 0.13, 0.13]
         DELAY = [0, -850, 4825, -1550, 0, 2110, 660, -220]
-        tt = TT.Swabian(CHANNELS, TRIGGER, DELAY, "QST")
+        tt = TT.Swabian(CHANNELS, TRIGGER, DELAY, "QST", "QST_Double_Layer")
 
         AQUISITION_TIME = int(60E12) # in picosecond
         N_REP = 1
@@ -32,7 +32,7 @@ def main():
         players = ["arya", "bran", "cersei", "dany"]
 
         # Create new device, Connect, begin polling, and enable
-        arya, bran, cersei, dany = players_init(players)
+        arya, bran, cersei, dany = motors_control.players_init(players)
 
         # Setting the measurmenet basis we want to measure
         elem_bases = ["x","y","z"]

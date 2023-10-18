@@ -1,6 +1,6 @@
 import numpy as np
 
-from players import players_init
+import motors_control
 import TT
 
 def main():
@@ -11,7 +11,7 @@ def main():
         CHANNELS = [4, 6, 7]
         TRIGGER = [0.13, 0.13, 0.13]
         DELAY = [-36530, -33990, -530]
-        tt = TT.Swabian(CHANNELS, TRIGGER, DELAY, "Bran_hwp", "Cersei_hwp")
+        tt = TT.Swabian(CHANNELS, TRIGGER, DELAY, "WP_calib", "Bran_hwp", "Cersei_hwp")
 
         AQUISITION_TIME = int(6E12) # in picosecond
         N_REP = 1
@@ -24,7 +24,7 @@ def main():
         players = ["bran","cersei"]
 
         # Create new device, Connect, begin polling, and enable
-        bran, cersei = players_init(players)
+        bran, cersei = motors_control.players_init(players)
         meas_angles = np.linspace(-90,90,91)
 
         ##########################################################
