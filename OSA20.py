@@ -7,10 +7,10 @@ Sample Python program tested successfully with Python 3.7
 Initial release, version 1.0
 """
 
-import socket
 import time
 import numpy as np
 import matplotlib.pyplot as plt
+import os
 
 BUFFER_SIZE = 1024
     
@@ -94,145 +94,164 @@ def Retrieve_Binary_trace(s):
     data = np.frombuffer(data_raw,dtype=np.dtype('>f4')) # https://docs.scipy.org/doc/numpy/reference/generated/numpy.frombuffer.html, Big endian order
 
     return data
-
-def plot_trace(s, trace, L_start, sampling, Length):
-    # Plot the trace
-    
-    L_stop = L_start + sampling * (Length - 1) / 1000
-    Wav = np.linspace(L_start, L_stop, Length)
-    
-    fig_raw = plt.figure()
-    ax = fig_raw.add_subplot(111)
-    ax.ticklabel_format(useOffset=False)
-    
-    ax.set_xlabel("Wavelength (nm)")
-    ax.set_ylabel("Power (dBm)")
-    
-    ax.plot(Wav,trace)
-    
-    plt.title("OSA20 trace")
-    fig_raw.show()  
     
 ###############################################################################
 # Code
-def scan(NUM_SCANS, set_single, trace_params, sens_params):
-    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-        s.settimeout(5)
-        s.connect((TCP_IP, TCP_PORT))
-        
+class OSA():
+    def __init__(self, s, set_single, trace_params, sens_params):
+        self.s = s
+        self.s.settimeout(5)
+        self.s.connect((TCP_IP, TCP_PORT))
+
+        self.set_single = set_single
+        self.trace_params = trace_params
+        self.sens_params = sens_params
+
         # Clear Error buffer
         Clear_error_buffer = "*CLS\r\n".encode()
-        s.send(Clear_error_buffer)
-        
+        self.s.send(Clear_error_buffer)
+
         # Query_IDN
         Query_IDN = "*IDN?\r\n".encode()
-        s.send(Query_IDN)
-        IDN = s.recv(BUFFER_SIZE).decode()
+        self.s.send(Query_IDN)
+        IDN = self.s.recv(BUFFER_SIZE).decode()
         print(IDN)
             
         # Set units
         Set_units = ":UNIT:X WAV;:UNIT:Y DBM\r\n".encode()
-        s.send(Set_units)
+        self.s.send(Set_units)
         
         # OSA Mode
         Set_Mode = ":OSA 1\r\n".encode()
-        s.send(Set_Mode)
-        # Wait_until_idle(s)
+        self.s.send(Set_Mode)
+        # Wait_until_idle(self.s)
         
         # Analysis Setup
         Set_Analysis = ":CALC:AUTO 0;:CALC:SOUR 1;:CALC:NFLO -65DBM;:CALC:MARKERS:ARAN 0\r\n".encode()
-        s.send(Set_Analysis)
+        self.s.send(Set_Analysis)
         
-        # Single, Manual
-        # Set_Single_Manual = ":INIT:SMOD 0;:INIT:TMOD 0\r\n".encode()
-        Set_Single_Manual = set_single.encode()
-        s.send(Set_Single_Manual)
-        
-        # Trace setup
-        # Set_Traces = ":TRAC1:STAT 1;:TRAC1:ACT;:TRAC1:TYPE 1\r\n".encode()
-        Set_Traces = trace_params.encode()
-        s.send(Set_Traces)
-        
-        # Scan setup
-        # Set_scan = ":SENS:SENS 3;:SENS:WAV:STAR 1500nm;:SENS:WAV:STOP 1600nm;:SENS:BAND:NAT 1;:SENS:TIME:INT:ENAB 0\r\n".encode()
-        Set_scan = sens_params.encode()
-        s.send(Set_scan)
-        
+        self.set_single_manual()
+        self.trace()
+        self.sens()
+
         # Setup Peak Trough Search Parameters
         Set_PT_search = ":CALC:PAR:PTS:DISP:STAT 1;:CALC:PAR:PTS:DISP:SHOW 1;:CALC:PAR:PTS:PTTH 3DB;:CALC:PAR:PTS:ANTH 1\r\n".encode()
-        s.send(Set_PT_search)
+        self.s.send(Set_PT_search)
         
         # Setup Spectral Width Parameters
         Set_SW_parameters = ":CALC:PAR:SWID:ACT 1;:CALC:PAR:SWID:DISP 1;:CALC:PAR:SWID:ALG 0;:CALC:PAR:SWID:WTHR 3DB;:CALC:PAR:SWID:MULT 1;:CALC:PAR:SWID:FMOD 0;:CALC:PAR:SWID:MAN 0\r\n".encode()
-        s.send(Set_SW_parameters)
+        self.s.send(Set_SW_parameters)
 
-        # # Zeroing auto
-        # Perform_zeroing_auto = ":SENS:ZERO:AUTO 1\r\n".encode()
-        # s.send(Perform_zeroing_auto)
+    def set_single_manual(self):
+        # Single, Manual
+        Set_Single_Manual = self.set_single.encode()
+        self.s.send(Set_Single_Manual)
         
+    def trace(self):
+        # Trace setup
+        # Set_Traces = ":TRAC1:STAT 1;:TRAC1:ACT;:TRAC1:TYPE 1\r\n".encode()
+        Set_Traces = self.trace_params.encode()
+        self.s.send(Set_Traces)
+
+    def sens(self):    
+        # Scan setup
+        Set_scan = self.sens_params.encode()
+        self.s.send(Set_scan)
+
+    def zero(self):
         # Zeroing
         Perform_zeroing = ":SENS:ZERO\r\n".encode()
-        s.send(Perform_zeroing)
-        Wait_until_idle(s)
-        
+        self.s.send(Perform_zeroing)
+        Wait_until_idle(self.s)
+
+    def zero_auto(self):
+        Perform_zeroing_auto = ":SENS:ZERO:AUTO 1\r\n".encode()
+        self.s.send(Perform_zeroing_auto)
+
+    def aquire_trace(self):
         # Acquire trace
         Acquire_trace = ":INIT\r\n".encode()
-        s.send(Acquire_trace)
+        self.s.send(Acquire_trace)
+        Wait_until_idle(self.s)
 
-        time.sleep(200)
-
-        # Wait_until_scan(s, NUM_SCANS)
+    def stop_acquire(self):
+        # Wait_until_scan(self.s, NUM_SCANS)
         Stop_trace = ":STOP\r\n".encode()
-        s.send(Stop_trace)
-        # Wait_until_idle(s)
-        Wait_until_idle(s)
-        
+        self.s.send(Stop_trace)
+        Wait_until_idle(self.s)
+
+    def get_results(self):
+
         # Get Trace Start Wavelength
         Query_start_wav = ":TRAC1:DATA:START?\r\n".encode()
-        s.send(Query_start_wav)
-        L_start = float(s.recv(BUFFER_SIZE).decode())*1E9 # L_start in nm
+        self.s.send(Query_start_wav)
+        self.L_start = float(self.s.recv(BUFFER_SIZE).decode())*1E9 # L_start in nm
             
         # Get Trace Length
         Query_trace_length = ":TRAC1:DATA:LENGTH?\r\n".encode()
-        s.send(Query_trace_length)
-        Length = int(s.recv(BUFFER_SIZE).decode())
+        self.s.send(Query_trace_length)
+        self.Length = int(self.s.recv(BUFFER_SIZE).decode())
         
         # Get Trace Sampling
         Query_sampling = ":TRAC1:DATA:SAMP?\r\n".encode()
-        s.send(Query_sampling)
-        sampling = float(s.recv(BUFFER_SIZE).decode())*1E12 # sampling in pm
+        self.s.send(Query_sampling)
+        self.sampling = float(self.s.recv(BUFFER_SIZE).decode())*1E12 # sampling in pm
         
         # Get Trace Data (BIN,mW)
         Query_data = ":TRAC1:DATA? 1,0\r\n".encode()
-        s.send(Query_data)
-        trace_mW = Retrieve_Binary_trace(s)
+        self.s.send(Query_data)
+        self.trace_mW = Retrieve_Binary_trace(self.s)
 
         # Get Trace Data (BIN,dBm)
         Query_data = ":TRAC1:DATA? 1,1\r\n".encode()
-        s.send(Query_data)
-        trace_dBm = Retrieve_Binary_trace(s)
-
+        self.s.send(Query_data)
+        self.trace_dBm = Retrieve_Binary_trace(self.s)
+    
+    def analyse(self):
         # Analyze
         Analyze = ":CALC\r\n".encode()
-        s.send(Analyze)
-        Wait_until_idle(s)
+        self.s.send(Analyze)
+        Wait_until_idle(self.s)
         
         # Get Peaks & Troughs List
         Query_PT_list = ":CALC:DATA:PTS?\r\n".encode()
-        s.send(Query_PT_list)
-        PT_list = s.recv(BUFFER_SIZE).decode()
-        print("Peaks Troughs list: {}".format(PT_list))
+        self.s.send(Query_PT_list)
+        self.PT_list = self.s.recv(BUFFER_SIZE).decode()
+        print("Peaks Troughs list: {}".format(self.PT_list))
         
         # Get Spectral Width results
         Query_SW_results = ":CALC:DATA:SWID?\r\n".encode()
-        s.send(Query_SW_results)
-        SW_results = s.recv(BUFFER_SIZE).decode()
-        print("Spectral Width results: {}".format(SW_results))
+        self.s.send(Query_SW_results)
+        self.SW_results = self.s.recv(BUFFER_SIZE).decode()
+        print("Spectral Width results: {}".format(self.SW_results))
         
         # Query Error queue
         Query_Error_queue = ":SYST:ERR?\r\n".encode()
-        s.send(Query_Error_queue)
-        Error = s.recv(BUFFER_SIZE).decode()
+        self.s.send(Query_Error_queue)
+        Error = self.s.recv(BUFFER_SIZE).decode()
         print(Error)
 
-    return trace_mW, trace_dBm, L_start, sampling, Length, PT_list, SW_results
+    def save_data(self, DATADIR, FOLDER, FILE, TXT=0, PARAMS=False, PEAKS=False):
+        self.get_results()
+        param_dir = f"{DATADIR}_{FOLDER}\\{FILE}"
+        os.makedirs(param_dir, exist_ok=True)
+
+        with open(param_dir + f"\\trace_{TXT}_mW.txt", mode="w") as f:
+            np.savetxt(f, self.trace_mW)
+            f.close()
+
+        with open(param_dir + f"\\trace_{TXT}_dBm.txt", mode="w") as f:
+            np.savetxt(f, self.trace_dBm)
+            f.close()
+
+        with open(param_dir + "\params.txt", mode="w") as f:
+            if PARAMS is True:
+                f.write(f"L_start       sampling      Length    \n")
+                f.write(f"{self.L_start}         {self.sampling}          {self.Length}\n")
+            if PEAKS is True:
+                self.analyse()
+                f.write(f"PT_list: {self.PT_list} \n")
+                f.write(f"SW_results: {self.SW_results}")
+            f.close()
+
+        

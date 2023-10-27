@@ -1,3 +1,4 @@
+### Created on: 10-2023
 # -*- coding: utf-8 -*-
 """
 Script should control the pure photonics and the OSA20
@@ -30,10 +31,6 @@ with ITLAConnect("COM5", baudrate=9600) as sercon:
     print("sercon: ", sercon)
 
     ITLA(sercon, 0x31, 1800, 1) # sets the output power (Reange is [600,1800] [dBm]/100)
-
-    ################################################################################
-    # Shutter init and open
-    shutter = motors_control.Shutter()
 
     # # Creates a list of frequencies, f_list, we want to sweep depending on the range of wavelength [start,stop] [m] and increments of inc [m].
     c=299792458
@@ -68,7 +65,6 @@ with ITLAConnect("COM5", baudrate=9600) as sercon:
 
         #######################
         # OSA starts DATA aquisition
-        shutter.open()
         trace_mW, trace_dBm, L_start, sampling, Length, PT_list, SW_results = osa.scan(NUM_SCANS, set_single, trace_params, sens_params)
 
         # #######################
@@ -89,40 +85,13 @@ with ITLAConnect("COM5", baudrate=9600) as sercon:
         with open(param_dir + "\\trace_dBm.txt", mode="w") as f:
             np.savetxt(f, trace_dBm)
             f.close()
-
-
-        #######################
-        # OSA starts BACKGROUND aquisition
-        shutter.close()
-        trace_mW, trace_dBm, L_start, sampling, Length, PT_list, SW_results = osa.scan(NUM_SCANS, set_single, trace_params, sens_params)
-
-        # #######################
-        # # Saving data
-        param_dir = DATADIR + "_Mira_off\\" + f"signal_{w_list[iter]}nm" 
-        os.makedirs(param_dir, exist_ok=True)
-        with open(param_dir + "\params.txt", mode="w") as f:
-            f.write(f"L_start       sampling      Length    \n")
-            f.write(f"{L_start}         {sampling}          {Length}\n")
-            f.write(f"PT_list: {PT_list} \n")
-            f.write(f"SW_results: {SW_results}")
-            f.close()
-
-        with open(param_dir + "\\trace_mW.txt", mode="w") as f:
-            np.savetxt(f, trace_mW)
-            f.close()
-
-        with open(param_dir + "\\trace_dBm.txt", mode="w") as f:
-            np.savetxt(f, trace_dBm)
-            f.close()
-
-        time.sleep(1)
         
         """    
         It can substract 2 signals (maybe can be used in the future when we have the shutter)
         Maybe still need to change CALC:NFLO
         """
 
-        # ITLA(sercon, 0x32, 0x00, 1) # turns the laser off # Included in the loop because I'm not sure I can change the frequency while the laser is on
+        ITLA(sercon, 0x32, 0x00, 1) # turns the laser off # Included in the loop because I'm not sure I can change the frequency while the laser is on
         time.sleep(5)
 
     sercon.close()

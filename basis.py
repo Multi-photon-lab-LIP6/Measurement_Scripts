@@ -1,3 +1,4 @@
+### Created on: 09-2023
 # Angles that define the different measurement basis considering the photons go through HWP and then QWP
 MEAS_WP_ANGLES = {"x": {"HWP": 22.5, "QWP": 90},
                   "y": {"HWP": 0, "QWP": 135},

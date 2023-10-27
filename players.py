@@ -1,5 +1,4 @@
-### Created on: 05-09-2023
-### Author: Laura Martins
+### Created on: 09-2023
 
 import numpy as np
 

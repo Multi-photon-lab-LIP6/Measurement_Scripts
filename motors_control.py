@@ -1,6 +1,6 @@
-### Created on: 16-10-2023
-### Author: Laura Martins
+### Created on: 10-2023
 ### Includes several classes to control the different Thorlabs motors in the setup
+### We should test if all scripts run without the individual .py files created for each motor. If so, we can delete and replace them for just this script
 
 import numpy as np
 
