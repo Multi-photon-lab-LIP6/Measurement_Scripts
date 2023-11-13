@@ -14,7 +14,7 @@ def main():
         ##################################################################
         CHANNELS = [1 ,2 ,3, 4, 5, 6, 7, 8]
         TRIGGER = [0.13, 0.13, 0.13, 0.13, 0.13, 0.13, 0.13, 0.13]
-        DELAY = [0, -850, 4825, -1550, 0, 2110, 660, -220]
+        DELAY = [0, -830, 4805, -1550, 0, 2110, 660, -220]
         tt = TT.Swabian(CHANNELS, TRIGGER, DELAY, "QST", "QST_Double_Layer")
 
         AQUISITION_TIME = int(60E12) # in picosecond

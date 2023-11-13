@@ -158,6 +158,10 @@ class OSA():
         Set_scan = self.sens_params.encode()
         self.s.send(Set_scan)
 
+    def update_sens(self, new_sens):
+        self.sens_params = new_sens
+        self.sens()
+
     def zero(self):
         # Zeroing
         Perform_zeroing = ":SENS:ZERO\r\n".encode()
@@ -172,7 +176,7 @@ class OSA():
         # Acquire trace
         Acquire_trace = ":INIT\r\n".encode()
         self.s.send(Acquire_trace)
-        Wait_until_idle(self.s)
+        # Wait_until_idle(self.s)
 
     def stop_acquire(self):
         # Wait_until_scan(self.s, NUM_SCANS)

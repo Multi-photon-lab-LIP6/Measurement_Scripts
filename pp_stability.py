@@ -15,7 +15,6 @@ from datetime import datetime
 import OSA20
 import motors_control
 from itla import ITLAConnect, ITLA
-# from lasers import PPCLLaser
 
 ###############################################################################
 # Setting the directory
@@ -61,21 +60,15 @@ try:
     ITLA(sercon, 0x32, 0x08, 1) # Laser on
     sleep(25)
 
-    # pp = PPCLLaser("COM5")
-    # pp.open()
-    # pp.enable()
-
     for j in range(NUM_SCANS):
         osa.aquire_trace()
-        osa.save_data(DATADIR, "_Mira_off", f"signal_1550_{j}nm", j, PARAMS, PEAKS)
+        osa.save_data(DATADIR, "_Mira_off", f"signal_1550nm_{j}", j, PARAMS, PEAKS)
 
-    # pp.close()
     sercon.close()
     s.close()
     shutter.off()
 
 except:
-    # pp.close()
     s.close()
     shutter.off()
     sercon.close()
