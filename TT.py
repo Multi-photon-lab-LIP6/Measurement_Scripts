@@ -6,7 +6,7 @@ import TimeTagger
 from datetime import datetime
 
 class Swabian:
-    def __init__(self, CHANNELS, TRIGGER, DELAY, FOLDER, FILE):#, FOLDER_2=None):
+    def __init__(self, CHANNELS, TRIGGER, DELAY, FOLDER, FILE, FOLDER_2=None):
         ### Setting the general parameter for the TT measurement ###
         self.tagger = TimeTagger.createTimeTagger()
         self.channels = CHANNELS
@@ -24,10 +24,10 @@ class Swabian:
         self.data_dir = r"C:\\Users\\Experience\Desktop\\Multipartite Entanglement Experiment\\Data"+f"\\{FOLDER}"+TYPE
 
         ### This is useful to calibrate Two WP's at the same time
-        # if FOLDER_2 is not None:
-        #     self.folder_2=True
-        #     TYPE_2 = f"\{FOLDER_2}_" + str(self.filestamp)
-        #     self.data_dir_2 = r"C:\\Users\\Experience\Desktop\\Multipartite Entanglement Experiment\\Data"+f"\\{FOLDER}"+TYPE_2
+        if FOLDER_2 is not None:
+            self.folder_2=True
+            TYPE_2 = f"\{FOLDER_2}_" + str(self.filestamp)
+            self.data_dir_2 = r"C:\\Users\\Experience\Desktop\\Multipartite Entanglement Experiment\\Data"+f"\\{FOLDER}"+TYPE_2
 
     """
     measure():
@@ -80,16 +80,16 @@ class Swabian:
         if save_params is True:
             self.save_params(self.data_dir)
 
-            # if self.folder_2 is True:
-                # self.save_params(self.data_dir_2)
+            if self.folder_2 is True:
+                self.save_params(self.data_dir_2)
 
         # Saves the aquired data
         if data_filename is not False:
-            # if self.folder_2 is True:
-            #     self.save_group(self.data_dir, data_filename, 0)
-            #     self.save_group(self.data_dir_2, data_filename, 1)
-            # else:
-            self.save_all_groups(self.data_dir, data_filename)
+            if self.folder_2 is True:
+                self.save_group(self.data_dir, data_filename, 0)
+                self.save_group(self.data_dir_2, data_filename, 1)
+            else:
+                self.save_all_groups(self.data_dir, data_filename)
 
         # cleans the TT
         self.clean_buffer()

@@ -14,10 +14,10 @@ def main():
         ##################################################################
         CHANNELS = [1, 2, 3, 4, 5, 6, 7, 8]
         TRIGGER = [0.13, 0.13, 0.13, 0.13, 0.13, 0.13, 0.13, 0.13]
-        DELAY = [0, -816, -30210, -36547, -36173, -34046, -526, -1418]
+        DELAY = [0, -846, -30200, -36547, -35543, -36776, -800, 1400]
         tt = TT.Swabian(CHANNELS, TRIGGER, DELAY, "QST", "QST_GHZ")
 
-        AQUISITION_TIME = int(7*60E12) # in picosecond
+        AQUISITION_TIME = int(0.3*60E12) # in picosecond
         N_REP = 1
         """
         Defining the coincidence channels we want to save
@@ -27,7 +27,7 @@ def main():
                   (1,4,5,7),(1,4,5,8),(1,4,6,7),(1,4,6,8),
                   (2,3,5,7),(2,3,5,8),(2,3,6,7),(2,3,6,8),
                   (2,4,5,7),(2,4,5,8),(2,4,6,7),(2,4,6,8)] 
-        COINCIDENCE_WINDOW = 200 # in picosecond
+        COINCIDENCE_WINDOW = 500 # in picosecond
 
         ##################################################################
         ##################### DEFINING THE PLAYERS #######################

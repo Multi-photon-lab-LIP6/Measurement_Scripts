@@ -9,30 +9,30 @@ def main():
         ##################################################################
         ############### DEFINING AND SAVING PARAMS #######################
         ##################################################################
-        CHANNELS = [1, 2, 5, 6, 7, 8]
+        CHANNELS = [1, 2, 3, 4, 7, 8]
         TRIGGER = [0.13, 0.13, 0.13, 0.13, 0.13, 0.13]
-        DELAY = [0, -816, -36173, -34046, -526, -1418]
+        DELAY = [0, -846, -30200, -36547, -800, 1400]
         tt = TT.Swabian(CHANNELS, TRIGGER, DELAY, "HOM", "HOM")
 
-        AQUISITION_TIME = int(2*60E12) # in picosecond
+        AQUISITION_TIME = int(0.3*60E12) # in picosecond
         N_REP = 1
         """
         Defining the coincidence channels we want to save
         If you change the order, make sure it matches with the analysis code
         """
-        GROUPS = [(5,6),(1,5),(6,8),(1,5,6),(1,6,8),(1,5,8),(5,6,8),(1,5,6,8)]
+        GROUPS = [(3,4),(1,3,4,7)]
         COINCIDENCE_WINDOW = 500 # in picosecond
 
         ##################################################################
         ##################### DEFINING THE PLAYERS #######################
         ##################################################################
-        players = ["arya", "cersei", "dany"]
+        players = ["arya", "bran", "dany"]
 
         # Create new device, Connect, begin polling, and enable
-        arya, cersei, dany = motors_control.players_init(players)
+        arya, bran, dany = motors_control.players_init(players)
 
         arya.set_meas_basis("z")
-        cersei.set_meas_basis("x")
+        bran.set_meas_basis("x")
         dany.set_meas_basis("z")
         time.sleep(1.5)
 
@@ -45,18 +45,22 @@ def main():
         ##########################################################
         ############### START MEASUREMENTS #######################
         ##########################################################
-        while float(position)<50:
+        while float(position)<60:
             if init!=0:
-                delay.move(step=0.1)
+                delay.move(step=0.01)
             position = delay.channel.Position.ToString()
             tt.measure(AQUISITION_TIME, N_REP, GROUPS, COINCIDENCE_WINDOW, count_singles=True, data_filename=f"\position={position}mm.txt", save_raw=True, save_params=True)
             time.sleep(1.5)
             init=1
 
+        # Rotate HWP back to 0°
+        bran.set_meas_basis("z")
+
         tt.free_swabian()
+
         # Stop polling and close devices
         arya.off()
-        cersei.off()
+        bran.off()
         dany.off()
         delay.off()
 

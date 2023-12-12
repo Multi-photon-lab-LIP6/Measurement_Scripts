@@ -42,10 +42,10 @@ Position of the motors, relative to their respective HOME, that aligns the fast 
 This is necessary to make sure both WP's in the same measurement station are algined and than we can more easily be self-consistent
 """
 WP_ZEROS =  {
-                "ARYA": {"HWP": 179.7273, "QWP": 244.86249},
-                "BRAN": {"HWP": 178.8840, "QWP": 86.4759},
-                "CERSEI": {"HWP": 175.6039, "QWP": 74.8664},
-                "DANY": {"HWP": 37.0029, "QWP": 35.2849}
+                "ARYA": {"HWP": 0, "QWP": 172},
+                "BRAN": {"HWP": 0, "QWP": 0},
+                "CERSEI": {"HWP": 0, "QWP": 0},
+                "DANY": {"HWP": 0, "QWP": 10.7}
             }
 
 """
@@ -58,16 +58,16 @@ INTERFERENCE_POSITION = 47.89566
 def players_init(players):
     players_list=[]
     for i, iter in enumerate(players):
-        if iter == "arya":
+        if iter == "arya" or iter == "ARYA":
             arya = Player("ARYA")
             players_list.append(arya)
-        elif iter == "bran":
+        elif iter == "bran" or iter == "BRAN":
             bran = Player("BRAN")
             players_list.append(bran)
-        elif iter == "cersei":
+        elif iter == "cersei" or iter == "CERSEI":
             cersei = Player("CERSEI")
             players_list.append(cersei)
-        elif iter == "dany":
+        elif iter == "dany" or iter == "DANY":
             dany = Player("DANY")
             players_list.append(dany)
     return players_list

@@ -14,10 +14,10 @@ def main():
         ##################################################################
         CHANNELS = [1 ,2 ,3, 4, 5, 6, 7, 8]
         TRIGGER = [0.13, 0.13, 0.13, 0.13, 0.13, 0.13, 0.13, 0.13]
-        DELAY = [0, -830, 4805, -1550, 0, 2110, 660, -220]
+        DELAY = [0, -830, -19600, -26200, -23700, -24800, 660, 3080]
         tt = TT.Swabian(CHANNELS, TRIGGER, DELAY, "QST", "QST_Double_Layer")
 
-        AQUISITION_TIME = int(60E12) # in picosecond
+        AQUISITION_TIME = int(30E12) # in picosecond
         N_REP = 1
         """
         Defining the coincidence channels we want to save
@@ -26,7 +26,7 @@ def main():
         GROUPS = [(1,3),(1,4),(2,3),(2,4),(5,7),(5,8),(6,7),(6,8), #pair coincidences we want to generate
                   (1,2,3),(1,2,4),(1,3,4),(2,3,4),(1,2,3,4), # unwanted double emission coincidences we need to account for in the QST
                   (5,6,7),(5,6,8),(5,7,8),(6,7,8),(5,6,7,8)] # unwanted double emission coincidences we need to account for in the QST
-        COINCIDENCE_WINDOW = 200 # in picosecond
+        COINCIDENCE_WINDOW = 500 # in picosecond
 
         ##################################################################
         ##################### DEFINING THE PLAYERS #######################
