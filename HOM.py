@@ -10,11 +10,11 @@ def main():
         ############### DEFINING AND SAVING PARAMS #######################
         ##################################################################
         CHANNELS = [1, 2, 3, 4, 7, 8]
-        TRIGGER = [0.13, 0.13, 0.13, 0.13, 0.13, 0.13]
+        TRIGGER = [0.13, 0.13, 0.13, 0.13, 0.13, 0.12]
         DELAY = [0, -846, -30200, -36547, -800, 1400]
         tt = TT.Swabian(CHANNELS, TRIGGER, DELAY, "HOM", "HOM")
 
-        AQUISITION_TIME = int(0.3*60E12) # in picosecond
+        AQUISITION_TIME = int(0.5*60E12) # in picosecond
         N_REP = 1
         """
         Defining the coincidence channels we want to save
@@ -39,15 +39,17 @@ def main():
         # Init Delay Stage class
 
         delay = motors_control.Delay()
+        position_ini = float(delay.channel.Position.ToString())
+        position_final = float(70)
         position = float(delay.channel.Position.ToString())
         init=0
 
         ##########################################################
         ############### START MEASUREMENTS #######################
         ##########################################################
-        while float(position)<60:
+        while float(position)<position_final:
             if init!=0:
-                delay.move(step=0.01)
+                delay.move(step=0.1)
             position = delay.channel.Position.ToString()
             tt.measure(AQUISITION_TIME, N_REP, GROUPS, COINCIDENCE_WINDOW, count_singles=True, data_filename=f"\position={position}mm.txt", save_raw=True, save_params=True)
             time.sleep(1.5)
@@ -56,7 +58,11 @@ def main():
         # Rotate HWP back to 0°
         bran.set_meas_basis("z")
 
+        # Make the delay back to its initial position
+        delay.move(position_ini-position_final)
+
         tt.free_swabian()
+
 
         # Stop polling and close devices
         arya.off()

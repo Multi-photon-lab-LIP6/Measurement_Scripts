@@ -23,7 +23,10 @@ class Swabian:
         TYPE = f"\{FILE}_" + str(self.filestamp)
         self.data_dir = r"C:\\Users\\Experience\Desktop\\Multipartite Entanglement Experiment\\Data"+f"\\{FOLDER}"+TYPE
 
-        ### This is useful to calibrate Two WP's at the same time
+        ### This is useful to calibrate Two WP's at the same time and to adapt the code for one or 2 folder 
+        if FOLDER_2 is None:
+            self.folder_2=False
+        
         if FOLDER_2 is not None:
             self.folder_2=True
             TYPE_2 = f"\{FOLDER_2}_" + str(self.filestamp)
@@ -75,13 +78,13 @@ class Swabian:
         # Starts aquiring data under the defined paramester above
         self.synchronized.startFor(self.aquisition_time)
         self.synchronized.waitUntilFinished()
-
+        
         # Save the params
         if save_params is True:
             self.save_params(self.data_dir)
-
             if self.folder_2 is True:
                 self.save_params(self.data_dir_2)
+
 
         # Saves the aquired data
         if data_filename is not False:

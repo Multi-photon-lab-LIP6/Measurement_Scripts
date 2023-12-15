@@ -13,7 +13,7 @@ def main():
         ############### DEFINING AND SAVING PARAMS #######################
         ##################################################################
         CHANNELS = [1, 2, 3, 4, 5, 6, 7, 8]
-        TRIGGER = [0.13, 0.13, 0.13, 0.13, 0.13, 0.13, 0.13, 0.13]
+        TRIGGER = [0.13, 0.13, 0.13, 0.13, 0.13, 0.13, 0.13, 0.12]
         DELAY = [0, -846, -30200, -36547, -35543, -36776, -800, 1400]
         tt = TT.Swabian(CHANNELS, TRIGGER, DELAY, "QST", "QST_GHZ")
 
@@ -49,9 +49,13 @@ def main():
         ############### START MEASUREMENTS #######################
         ##########################################################
         for base in meas_bases:
-            ### the players' motors are rotated to the intended meas_basis
+            phase=-69.009982
+            ### the players' motors are rotated to the intended meas_basis²²²
             print(f"Measuring basis: {base}")
-            arya.set_meas_basis(base[0])
+            if base[0]=="z" or base[0]=="a":
+                arya.set_meas_basis(base[0])
+            else:
+                arya.set_meas_basis(base[0], phase)
             bran.set_meas_basis(base[1])
             cersei.set_meas_basis(base[2])
             dany.set_meas_basis(base[3])
@@ -60,6 +64,7 @@ def main():
             label=''.join([idx for tup in base for idx in tup])
             tt.measure(AQUISITION_TIME, N_REP, GROUPS, COINCIDENCE_WINDOW, count_singles=True, data_filename=f"\ABCD={label}.txt", save_raw=True, save_params=True)
 
+        
         # Leave the WP's in the Z basis
         arya.set_meas_basis("z")
         bran.set_meas_basis("z")
