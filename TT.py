@@ -2,6 +2,8 @@
 
 import os
 import TimeTagger
+import time
+import numpy as np
 
 from datetime import datetime
 
@@ -17,7 +19,7 @@ class Swabian:
         for i, inp in enumerate(CHANNELS):
             self.tagger.setTriggerLevel(channel=inp, voltage=TRIGGER[i])
             self.tagger.setInputDelay(inp, DELAY[i]) ### Or setdelayhardware???
-            # tagger.setTestSignal(inp, True) # Comment if we want a real measurement
+        #self.tagger.setTestSignal([1,2,3,4,5,6,7,8], True) # Comment if we want a real measurement
         ### Saving a time stamp to use in the filename to avoid overwriting data ###
         self.filestamp=datetime.now().strftime('%Y%m%d%H%M%S')
         TYPE = f"\{FILE}_" + str(self.filestamp)
@@ -97,6 +99,62 @@ class Swabian:
         # cleans the TT
         self.clean_buffer()
         
+    def real_time_measure(self,AQUISITION_TIME, N_REP, GROUPS, COINCIDENCE_WINDOW, count_singles=False, data_filename=False, save_raw=True, save_params=True):
+
+        self.n_reps = N_REP
+        self.groups = GROUPS
+        self.coincidence_window = COINCIDENCE_WINDOW
+        self.aquisition_time = AQUISITION_TIME
+
+        # We will record the single conunts and coincidences in one file AND the raw time stamps if we want to use it in post-analysis
+        self.synchronized = TimeTagger.SynchronizedMeasurements(self.tagger)
+        sync_tagger_proxy = self.synchronized.getTagger()
+
+        self.coincidences = TimeTagger.Coincidences(tagger=sync_tagger_proxy,
+                                            coincidenceGroups=self.groups,
+                                            coincidenceWindow=self.coincidence_window)
+        
+        # Sets the list of channels to be analysed by the self.counter depending if we want to measure single events or just coincidence events
+        self.list_channels = list(self.coincidences.getChannels())
+        if count_singles is True:
+            self.list_channels = self.list_channels + self.channels
+
+        self.counter = TimeTagger.Counter(tagger=sync_tagger_proxy,
+                                    channels=self.list_channels,
+                                    binwidth=self.aquisition_time,
+                                    n_values=self.n_reps)
+        if save_raw is True:
+            raw_dir = self.data_dir + "\\raw"
+            os.makedirs(raw_dir, exist_ok=True)
+
+            self.filewriter = TimeTagger.FileWriter(sync_tagger_proxy, raw_dir + os.sep + "filewriter", self.channels)
+            self.filewriter.setMaxFileSize(500 * 1024)
+
+
+        # Starts aquiring data under the defined paramester above
+        self.synchronized.start()
+        while (np.sum(self.counter.getData())==0):
+            continue
+        self.synchronized.stop()
+
+        # Save the params
+        if save_params is True:
+            self.save_params(self.data_dir)
+            if self.folder_2 is True:
+                self.save_params(self.data_dir_2)
+
+
+        # Saves the aquired data
+        if data_filename is not False:
+            if self.folder_2 is True:
+                self.save_group(self.data_dir, data_filename, 0)
+                self.save_group(self.data_dir_2, data_filename, 1)
+            else:
+                self.save_all_groups(self.data_dir, data_filename)
+
+        # cleans the TT
+        self.clean_buffer()
+
 
 
     def save_params(self, dir):
@@ -112,7 +170,7 @@ class Swabian:
         # Save the single counts and coincidences in a file
         with open(counts_dir + filename, mode="w") as f:
             d=""
-            for j, counts in enumerate(self.counter.getData()): d=d+f"{counts[0]}   "
+            for j, counts in enumerate(self.counter.getData()): d=d+f"{counts[0]} "
             f.write(d)
             f.close()
 

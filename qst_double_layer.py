@@ -24,8 +24,9 @@ def main():
         If you change the order, make sure it matches with the analysis code
         """
         GROUPS = [(1,3),(1,4),(2,3),(2,4),(5,7),(5,8),(6,7),(6,8), #pair coincidences we want to generate
-                  (1,2,3),(1,2,4),(1,3,4),(2,3,4),(1,2,3,4), # unwanted double emission coincidences we need to account for in the QST
-                  (5,6,7),(5,6,8),(5,7,8),(6,7,8),(5,6,7,8)] # unwanted double emission coincidences we need to account for in the QST
+                  (1,2,3),(1,2,4),(1,3,4),(2,3,4), # unwanted double emission coincidences we need to account for in the QST
+                  (5,6,7),(5,6,8),(5,7,8),(6,7,8),
+                  (1,2,3,4),(5,6,7,8)] # unwanted double emission coincidences we need to account for in the QST
         COINCIDENCE_WINDOW = 500 # in picosecond
 
         ##################################################################
