@@ -42,10 +42,10 @@ Position of the motors, relative to their respective HOME, that aligns the fast 
 This is necessary to make sure both WP's in the same measurement station are algined and than we can more easily be self-consistent
 """
 WP_ZEROS =  {
-                "ARYA": {"HWP": -25.623, "QWP": 174.320786,"QWP1": -25.623, "HWP1": 174.320786, "QWP2": 174.320786},
+                "ARYA": {"HWP": 154.37667, "QWP": 174.320786,"QWP1": -25.623, "HWP1": 174.320786, "QWP2": 174.320786},
                 "BRAN": {"HWP": 37.1530, "QWP": 160.498799,"QWP1": -25.623, "HWP1": 174.320786, "QWP2": 174.320786},
-                "CERSEI": {"HWP": 28.1609, "QWP": 70.809, "QWP1": -25.623, "HWP1": 174.320786, "QWP2": 174.320786},
-                "DANY": {"HWP": -20.572, "QWP": 28.9077, "QWP1": -25.623, "HWP1": 174.320786, "QWP2": 174.320786}
+                "CERSEI": {"HWP": 27.44468, "QWP": 67.13164, "QWP1": -25.623, "HWP1": 174.320786, "QWP2": 174.320786},
+                "DANY": {"HWP": 159.428, "QWP": 28.9077, "QWP1": -25.623, "HWP1": 174.320786, "QWP2": 174.320786}
             }
 
 """
@@ -160,10 +160,9 @@ class Player:
                     print("Device Homed: " + str(self.name) + " " + str(self.wp_name[i]))
 
 
-    def set_meas_basis(self, basis, phase=0):
-        
-        self.wp[0].MoveTo(Decimal((MEAS_WP_ANGLES[str(basis)]["HWP"]+WP_ZEROS[self.name]["HWP"]+phase)%360), 10000)
-        self.wp[1].MoveTo(Decimal((MEAS_WP_ANGLES[str(basis)]["QWP"]+WP_ZEROS[self.name]["QWP"])%360), 10000)
+    def set_meas_basis(self, basis, phaseH=0, phaseQ=0):
+        self.wp[0].MoveTo(Decimal((MEAS_WP_ANGLES[str(basis)]["HWP"]+WP_ZEROS[self.name]["HWP"]+phaseH)%360), 10000)
+        self.wp[1].MoveTo(Decimal((MEAS_WP_ANGLES[str(basis)]["QWP"]+WP_ZEROS[self.name]["QWP"]+phaseQ)%360), 10000)
         time.sleep(1.5)
 
     def set_meas_angles(self, angles):

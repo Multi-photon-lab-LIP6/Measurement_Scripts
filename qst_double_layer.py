@@ -13,8 +13,8 @@ def main():
         ############### DEFINING AND SAVING PARAMS #######################
         ##################################################################
         CHANNELS = [1 ,2 ,3, 4, 5, 6, 7, 8]
-        TRIGGER = [0.13, 0.13, 0.13, 0.13, 0.13, 0.13, 0.13, 0.13]
-        DELAY = [0, -830, -19600, -26200, -23700, -24800, 660, 3080]
+        TRIGGER = [0.13, 0.13, 0.13, 0.13, 0.13, 0.13, 0.13, 0.12]
+        DELAY = [-3610, -550, -19500, -25850, -23600, -24900, 860, 3080]
         tt = TT.Swabian(CHANNELS, TRIGGER, DELAY, "QST", "QST_Double_Layer")
 
         AQUISITION_TIME = int(30E12) # in picosecond
@@ -51,6 +51,13 @@ def main():
         for base in meas_bases:
             ### the players' motors are rotated to the intended meas_basis
             print(f"Measuring basis: {base}")
+            if base[0]=="z" or base[0]=="a":
+                arya.set_meas_angles([23.063037429232164,18.70201812641578])
+            elif base[0]=="x":
+                arya.set_meas_angles([1.5233290319349844,35.402165883498995])
+            elif base[0]=="y":
+                arya.set_meas_angles([83.8877358504551, 83.14675418813579])
+
             arya.set_meas_basis(base[0])
             bran.set_meas_basis(base[1])
             cersei.set_meas_basis(base[2])
