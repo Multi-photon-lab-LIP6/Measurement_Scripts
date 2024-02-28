@@ -30,10 +30,10 @@ from basis import MEAS_WP_ANGLES
 
 # We define the serial numbers corresponding to the waveplates in each player, the delay stage and the shutter
 SERIAL_NO = {
-                "ARYA": {"HWP": str("28250846"), "QWP": str("28250824"), "QWP1": str("28250846"),"HWP1": str("28250846"),"QWP2": str("28250846")},
-                "BRAN": {"HWP": str("28250843"), "QWP": str("28250701"),"QWP1": str("28250846"),"HWP1": str("28250846"),"QWP2": str("28250846")},
-                "CERSEI": {"HWP": str("28250804"), "QWP": str("28250807"),"QWP1": str("28250846"),"HWP1": str("28250846"),"QWP2": str("28250846")},
-                "DANY": {"HWP": str("28250806"), "QWP": str("28250811"),"QWP1": str("28250846"),"HWP1": str("28250846"),"QWP2": str("28250846")},
+                "ARYA": {"HWP": str("28250846"), "QWP": str("28250824"), "SQWP2": str("28253100"),"SHWP": str("28252968"),"SQWP1": str("28253024")},
+                "BRAN": {"HWP": str("28250843"), "QWP": str("28250701"),"SQWP2": str("28252978"),"SHWP": str("28253186"),"SQWP1": str("28253024")},
+                "CERSEI": {"HWP": str("28250804"), "QWP": str("28250807"),"SQWP2": str("28253068"),"SHWP": str("28253095"),"SQWP1": str("28253074")},
+                "DANY": {"HWP": str("28250806"), "QWP": str("28250811"),"SQWP2": str("28252981"),"SHWP": str("28252975"),"SQWP1": str("28252976")},
                 "DELAY": str("40381974"),
                 "SHUTTER": str("68800559")
             }
@@ -42,33 +42,33 @@ Position of the motors, relative to their respective HOME, that aligns the fast 
 This is necessary to make sure both WP's in the same measurement station are algined and than we can more easily be self-consistent
 """
 WP_ZEROS =  {
-                "ARYA": {"HWP": 154.37667, "QWP": 174.320786,"QWP1": -25.623, "HWP1": 174.320786, "QWP2": 174.320786},
-                "BRAN": {"HWP": 37.1530, "QWP": 160.498799,"QWP1": -25.623, "HWP1": 174.320786, "QWP2": 174.320786},
-                "CERSEI": {"HWP": 27.44468, "QWP": 67.13164, "QWP1": -25.623, "HWP1": 174.320786, "QWP2": 174.320786},
-                "DANY": {"HWP": 159.428, "QWP": 28.9077, "QWP1": -25.623, "HWP1": 174.320786, "QWP2": 174.320786}
+                "ARYA": {"HWP": 23.8401993242, "QWP": 355.3658418,"SQWP2": 78.95983741, "SHWP": 159.4573, "SQWP1": 174.320786},
+                "BRAN": {"HWP": 103.91959, "QWP": 156.5907,"SQWP2": 147.75603450, "SHWP": 155.1809823, "SQWP1": 388.8269421},
+                "CERSEI": {"HWP": 190.0750650, "QWP": 67.785387, "SQWP2": 149.244498, "SHWP": 205.189772, "SQWP1": 182.1837136076},
+                "DANY": {"HWP": 268.23353776, "QWP": 214.76183, "SQWP2": 11.30016, "SHWP": 171.57796198, "SQWP1": 191.75824}
             }
 
 """
 Default position of the delay stage. It corresponds to the position for maximum interference
 between the two emitted pairs (top and bottom) - found with the hom.py and HOM.ipynb scripts 
 """
-INTERFERENCE_POSITION = 47.89566
+INTERFERENCE_POSITION = 57.5
 
 # players_init initializes the different players we are using in each script
-def players_init(players):
+def players_init(players, sample=None):
     players_list=[]
     for i, iter in enumerate(players):
         if iter == "arya" or iter == "ARYA":
-            arya = Player("ARYA")
+            arya = Player("ARYA", sample)
             players_list.append(arya)
         elif iter == "bran" or iter == "BRAN":
-            bran = Player("BRAN")
+            bran = Player("BRAN", sample)
             players_list.append(bran)
         elif iter == "cersei" or iter == "CERSEI":
-            cersei = Player("CERSEI")
+            cersei = Player("CERSEI", sample)
             players_list.append(cersei)
         elif iter == "dany" or iter == "DANY":
-            dany = Player("DANY")
+            dany = Player("DANY", sample)
             players_list.append(dany)
     return players_list
 
@@ -77,87 +77,82 @@ This class Connects, begins polling, and enables, moves to new position, stops p
 The devices correspond to a HWP and to a QWP
 """
 class Player:
-    def __init__(self, player,phase_estimation=None):
+    def __init__(self, player, sample=None):
         # Build device list so that the library can find yours
         DeviceManagerCLI.BuildDeviceList()
 
-
-        self.phase_estimation = phase_estimation
         self.name=player
 
-        if phase_estimation == None:
-            self.wp_name=["HWP", "QWP"]
-            self.wp_serial_no=[SERIAL_NO[str(self.name)]["HWP"], SERIAL_NO[str(self.name)]["QWP"]]
-            self.wp = [KCubeBrushlessMotor.CreateKCubeBrushlessMotor(self.wp_serial_no[0]),
-                        KCubeBrushlessMotor.CreateKCubeBrushlessMotor(self.wp_serial_no[1])]
-            print(self.wp)
+        self.wp_name=["HWP", "QWP"]
+        self.wp_serial_no=[SERIAL_NO[str(self.name)]["HWP"], SERIAL_NO[str(self.name)]["QWP"]]
+        self.wp = [KCubeBrushlessMotor.CreateKCubeBrushlessMotor(self.wp_serial_no[0]),
+                    KCubeBrushlessMotor.CreateKCubeBrushlessMotor(self.wp_serial_no[1])]
+        print(self.wp)
+    
+        ### Connecting to the HWP-QWP measurement basis waveplates
+        for i in range(2):
+            self.wp[i].name = str(self.name)+self.wp_name[i]
+            self.wp[i].Connect(self.wp_serial_no[i])
+            time.sleep(0.25)
+
+            self.wp[i].StartPolling(250)
+            time.sleep(0.25)  # wait statements are important to allow settings to be sent to the device
+
+            self.wp[i].EnableDevice()
+            time.sleep(0.25)  # Wait for device to enable
+
+                # Wait for Settings to Initialise
+            if not self.wp[i].IsSettingsInitialized():
+                self.wp[i].WaitForSettingsInitialized(10000)  # 10 second timeout
+                assert self.wp[i].IsSettingsInitialized() is True
+
+                # Before homing or moving device, ensure the motors configuration is loaded
+            m_config = self.wp[i].LoadMotorConfiguration(self.wp_serial_no[i],
+                            DeviceConfiguration.DeviceSettingsUseOptionType.UseDeviceSettings)
+
+            time.sleep(1)
+
+            # Home stage
+            print("Homing Device: " + str(self.name) + " " + str(self.wp_name[i]))
+            self.wp[i].Home(60000)  # 60 second timeout
+            time.sleep(1.5)
+            print("Device Homed: " + str(self.name) + " " + str(self.wp_name[i]))
+
+        ### Connecting to the QWP-HWP-QWP sample waveplates
+        if sample is not None:
+            self.sample_wp_name = sample
+            self.sample_wp_serial_no=[SERIAL_NO[str(self.name)][j] for i,j in enumerate(sample)]
+            self.sample_wp = [KCubeBrushlessMotor.CreateKCubeBrushlessMotor(j) for i,j in enumerate(self.sample_wp_serial_no)] 
         
-            
-            for i in range(2):
-                self.wp[i].name = str(self.name)+self.wp_name[i]
-                self.wp[i].Connect(self.wp_serial_no[i])
+            print(self.sample_wp)
+
+            for i in range(len(sample)):
+                self.sample_wp[i].name = str(self.name)+self.sample_wp_name[i]
+                self.sample_wp[i].Connect(self.sample_wp_serial_no[i])
                 time.sleep(0.25)
 
-                self.wp[i].StartPolling(250)
+                self.sample_wp[i].StartPolling(250)
                 time.sleep(0.25)  # wait statements are important to allow settings to be sent to the device
 
-                self.wp[i].EnableDevice()
+                self.sample_wp[i].EnableDevice()
                 time.sleep(0.25)  # Wait for device to enable
 
-                    # Wait for Settings to Initialise
-                if not self.wp[i].IsSettingsInitialized():
-                    self.wp[i].WaitForSettingsInitialized(10000)  # 10 second timeout
-                    assert self.wp[i].IsSettingsInitialized() is True
+                # Wait for Settings to Initialise
+                if not self.sample_wp[i].IsSettingsInitialized():
+                    self.sample_wp[i].WaitForSettingsInitialized(10000)  # 10 second timeout
+                    assert self.sample_wp[i].IsSettingsInitialized() is True
 
-                    # Before homing or moving device, ensure the motors configuration is loaded
-                m_config = self.wp[i].LoadMotorConfiguration(self.wp_serial_no[i],
+                # Before homing or moving device, ensure the motors configuration is loaded
+                m_config = self.sample_wp[i].LoadMotorConfiguration(self.sample_wp_serial_no[i],
                                 DeviceConfiguration.DeviceSettingsUseOptionType.UseDeviceSettings)
 
                 time.sleep(1)
 
                     # Home stage
-                print("Homing Device: " + str(self.name) + " " + str(self.wp_name[i]))
-                self.wp[i].Home(60000)  # 60 second timeout
+                print("Homing Device: " + str(self.name) + " " + str(self.sample_wp_name[i]))
+                self.sample_wp[i].Home(60000)  # 60 second timeout
                 time.sleep(1.5)
-                print("Device Homed: " + str(self.name) + " " + str(self.wp_name[i]))
-
-        else :
-                self.wp_name=["HWP", "QWP","QWP1","HWP1","QWP2"]
-                self.wp_serial_no=[SERIAL_NO[str(self.name)]["HWP"], SERIAL_NO[str(self.name)]["QWP"],SERIAL_NO[str(self.name)]["QWP1"],SERIAL_NO[str(self.name)]["HWP1"],SERIAL_NO[str(self.name)]["QWP2"]]
-                self.wp = [KCubeBrushlessMotor.CreateKCubeBrushlessMotor(self.wp_serial_no[0]),
-                            KCubeBrushlessMotor.CreateKCubeBrushlessMotor(self.wp_serial_no[1]),
-                            KCubeBrushlessMotor.CreateKCubeBrushlessMotor(self.wp_serial_no[2]),
-                            KCubeBrushlessMotor.CreateKCubeBrushlessMotor(self.wp_serial_no[3]),
-                            KCubeBrushlessMotor.CreateKCubeBrushlessMotor(self.wp_serial_no[4])]
-                print(self.wp)
-
-                for i in range(phase_estimation):
-                    self.wp[i].name = str(self.name)+self.wp_name[i]
-                    self.wp[i].Connect(self.wp_serial_no[i])
-                    time.sleep(0.25)
-
-                    self.wp[i].StartPolling(250)
-                    time.sleep(0.25)  # wait statements are important to allow settings to be sent to the device
-
-                    self.wp[i].EnableDevice()
-                    time.sleep(0.25)  # Wait for device to enable
-
-                    # Wait for Settings to Initialise
-                    if not self.wp[i].IsSettingsInitialized():
-                        self.wp[i].WaitForSettingsInitialized(10000)  # 10 second timeout
-                        assert self.wp[i].IsSettingsInitialized() is True
-
-                    # Before homing or moving device, ensure the motors configuration is loaded
-                    m_config = self.wp[i].LoadMotorConfiguration(self.wp_serial_no[i],
-                                    DeviceConfiguration.DeviceSettingsUseOptionType.UseDeviceSettings)
-
-                    time.sleep(1)
-
-                    # Home stage
-                    print("Homing Device: " + str(self.name) + " " + str(self.wp_name[i]))
-                    self.wp[i].Home(60000)  # 60 second timeout
-                    time.sleep(1.5)
-                    print("Device Homed: " + str(self.name) + " " + str(self.wp_name[i]))
+                print("Device Homed: " + str(self.name) + " " + str(self.sample_wp_name[i]))
 
 
     def set_meas_basis(self, basis, phaseH=0, phaseQ=0):
@@ -170,32 +165,23 @@ class Player:
         self.wp[1].MoveTo(Decimal((angles[1]+WP_ZEROS[self.name]["QWP"])%360), 10000)
         time.sleep(1.5)
 
+    def set_sample_angles(self, angles):
+        for i, angle in enumerate(angles):
+            self.sample_wp[i].MoveTo(Decimal((angle+WP_ZEROS[self.name][self.sample_wp_name[i]])%360), 10000)
+        time.sleep(1.5)
+
     def off(self):
         self.wp[0].StopPolling()
         self.wp[1].StopPolling()
         self.wp[0].Disconnect(True)
         self.wp[1].Disconnect(True)
-            
-    def set_meas_basis_phase_phase_estimation(self, basis, phase=0):  
-        self.wp[2].MoveTo(Decimal((MEAS_WP_ANGLES[str(basis)]["QWP1"]+WP_ZEROS[self.name]["QWP1"]+phase)%360), 10000)
-        self.wp[3].MoveTo(Decimal((MEAS_WP_ANGLES[str(basis)]["HWP1"]+WP_ZEROS[self.name]["HWP1"])%360), 10000)
-        self.wp[4].MoveTo(Decimal((MEAS_WP_ANGLES[str(basis)]["QWP1"]+WP_ZEROS[self.name]["QWP2"])%360), 10000)
-        time.sleep(1.5)
-
-    def set_meas_angles_phase_estimation(self, angles):
-        self.wp[2].MoveTo(Decimal((angles[0]+WP_ZEROS[self.name]["QWP1"])%360), 10000)
-        self.wp[3].MoveTo(Decimal((angles[1]+WP_ZEROS[self.name]["HWP1"])%360), 10000)
-        self.wp[4].MoveTo(Decimal((angles[2]+WP_ZEROS[self.name]["QWP2"])%360), 10000)
-        time.sleep(1.5)
     
-    def off_phase_estimation(self):
-        self.wp[2].StopPolling()
-        self.wp[3].StopPolling()
-        self.wp[4].StopPolling()
-        self.wp[2].Disconnect(True)
-        self.wp[3].Disconnect(True)
-        self.wp[4].Disconnect(True)
+    def off_sample(self):
+        for i, j in enumerate(self.sample_wp):
+            self.sample_wp[i].StopPolling()
+            self.sample_wp[i].Disconnect(True)
 
+    
 """
 This class Connects, begins polling, and enables, moves to new position, stops polling and closes the delay stage device
 """
