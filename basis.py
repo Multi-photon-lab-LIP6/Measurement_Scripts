@@ -6,7 +6,10 @@ MEAS_WP_ANGLES = {"x": {"HWP": 22.5, "QWP": 90},
                   "-x": {"HWP": -22.5, "QWP": 90},
                   "-y": {"HWP": 0, "QWP": 45},
                   "-z": {"HWP": 45, "QWP": 90},
-                  "a": {"HWP": 45, "QWP": 90}}
+                  "a": {"HWP": 45, "QWP": 90},
+                  "i" : {"HWP": 0, "QWP": 90},
+                  "-i": {"HWP": 45, "QWP": 90}}
+                    
 
 
 # # If photons are sent the V state.

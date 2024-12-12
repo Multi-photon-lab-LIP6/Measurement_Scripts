@@ -30,7 +30,7 @@ from basis import MEAS_WP_ANGLES
 
 # We define the serial numbers corresponding to the waveplates in each player, the delay stage and the shutter
 SERIAL_NO = {
-                "ARYA": {"HWP": str("28250846"), "QWP": str("28250824"), "SQWP2": str("28253100"),"SHWP": str("28252968"),"SQWP1": str("28253024")},
+                "ARYA": {"HWP": str("28250846"), "QWP": str("28250824"), "SQWP2": str("28253100"),"SHWP": str("28252968"),"SQWP1": str("28253193")},
                 "BRAN": {"HWP": str("28250843"), "QWP": str("28250701"),"SQWP2": str("28252978"),"SHWP": str("28253186"),"SQWP1": str("28253024")},
                 "CERSEI": {"HWP": str("28250804"), "QWP": str("28250807"),"SQWP2": str("28253068"),"SHWP": str("28253095"),"SQWP1": str("28253074")},
                 "DANY": {"HWP": str("28250806"), "QWP": str("28250811"),"SQWP2": str("28252981"),"SHWP": str("28252975"),"SQWP1": str("28252976")},
@@ -42,10 +42,10 @@ Position of the motors, relative to their respective HOME, that aligns the fast 
 This is necessary to make sure both WP's in the same measurement station are algined and than we can more easily be self-consistent
 """
 WP_ZEROS =  {
-                "ARYA": {"HWP": 23.8401993242, "QWP": 355.3658418,"SQWP2": 78.95983741, "SHWP": 159.4573, "SQWP1": 174.320786},
-                "BRAN": {"HWP": 103.91959, "QWP": 156.5907,"SQWP2": 147.75603450, "SHWP": 155.1809823, "SQWP1": 388.8269421},
-                "CERSEI": {"HWP": 190.0750650, "QWP": 67.785387, "SQWP2": 149.244498, "SHWP": 205.189772, "SQWP1": 182.1837136076},
-                "DANY": {"HWP": 268.23353776, "QWP": 214.76183, "SQWP2": 11.30016, "SHWP": 171.57796198, "SQWP1": 191.75824}
+                "ARYA": {"HWP": 13.2477203, "QWP": 174.460649,"SQWP2": 148.379524, "SHWP": 48.558451, "SQWP1": 53.3219460},
+                "BRAN": {"HWP": 13.91959, "QWP": 156.5907,"SQWP2": 147.75603450, "SHWP": 65.1809823, "SQWP1": 298.8269421},
+                "CERSEI": {"HWP": 190.0750650, "QWP": 67.785387, "SQWP2": 59.244498, "SHWP": 205.189772, "SQWP1": 92.1837136076},
+                "DANY": {"HWP": 300.91003135345167, "QWP": 214.76183, "SQWP2": 69.90931308401102, "SHWP": 194.99868056282844, "SQWP1": 136.175057930766116}
             }
 
 """
@@ -105,10 +105,12 @@ class Player:
             if not self.wp[i].IsSettingsInitialized():
                 self.wp[i].WaitForSettingsInitialized(10000)  # 10 second timeout
                 assert self.wp[i].IsSettingsInitialized() is True
+            
 
                 # Before homing or moving device, ensure the motors configuration is loaded
             m_config = self.wp[i].LoadMotorConfiguration(self.wp_serial_no[i],
                             DeviceConfiguration.DeviceSettingsUseOptionType.UseDeviceSettings)
+
 
             time.sleep(1)
 
@@ -117,7 +119,7 @@ class Player:
             self.wp[i].Home(60000)  # 60 second timeout
             time.sleep(1.5)
             print("Device Homed: " + str(self.name) + " " + str(self.wp_name[i]))
-
+            
         ### Connecting to the QWP-HWP-QWP sample waveplates
         if sample is not None:
             self.sample_wp_name = sample
@@ -155,20 +157,17 @@ class Player:
                 print("Device Homed: " + str(self.name) + " " + str(self.sample_wp_name[i]))
 
 
-    def set_meas_basis(self, basis, phaseH=0, phaseQ=0):
-        self.wp[0].MoveTo(Decimal((MEAS_WP_ANGLES[str(basis)]["HWP"]+WP_ZEROS[self.name]["HWP"]+phaseH)%360), 10000)
-        self.wp[1].MoveTo(Decimal((MEAS_WP_ANGLES[str(basis)]["QWP"]+WP_ZEROS[self.name]["QWP"]+phaseQ)%360), 10000)
-        time.sleep(1.5)
+    def set_meas_basis(self, basis):
+        self.wp[0].MoveTo(Decimal((MEAS_WP_ANGLES[str(basis)]["HWP"]+WP_ZEROS[self.name]["HWP"])%360), 10000)
+        self.wp[1].MoveTo(Decimal((MEAS_WP_ANGLES[str(basis)]["QWP"]+WP_ZEROS[self.name]["QWP"])%360), 10000)
 
     def set_meas_angles(self, angles):
         self.wp[0].MoveTo(Decimal((angles[0]+WP_ZEROS[self.name]["HWP"])%360), 10000)
         self.wp[1].MoveTo(Decimal((angles[1]+WP_ZEROS[self.name]["QWP"])%360), 10000)
-        time.sleep(1.5)
 
     def set_sample_angles(self, angles):
         for i, angle in enumerate(angles):
             self.sample_wp[i].MoveTo(Decimal((angle+WP_ZEROS[self.name][self.sample_wp_name[i]])%360), 10000)
-        time.sleep(1.5)
 
     def off(self):
         self.wp[0].StopPolling()
@@ -180,6 +179,12 @@ class Player:
         for i, j in enumerate(self.sample_wp):
             self.sample_wp[i].StopPolling()
             self.sample_wp[i].Disconnect(True)
+            
+    def set_velocity(self,velo,acc):
+        for i in range(2):
+            self.wp[i].SetSettings(self.wp[i].MotorDeviceSettings, True)
+            self.wp[i].SetVelocityParams(Decimal(velo), Decimal(acc))
+                
 
     
 """

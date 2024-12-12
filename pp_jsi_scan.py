@@ -28,8 +28,8 @@ DATADIR = r"C:\\Users\\Experience\Desktop\\Multipartite Entanglement Experiment\
 
 # Creates a list of frequencies, f_list, we want to sweep depending on the range of wavelength [start,stop] [m] and increments of inc [m].
 c=299792458
-start=1545*1e-9
-stop=1554*1e-9
+start=1545.5*1e-9
+stop=1553.5*1e-9
 inc=20*1e-12
 no_points=(stop-start)/inc
 w_list=np.arange(start,stop,inc)
@@ -69,7 +69,7 @@ try:
         print(f"iter, freq, w_list[iter]: {iter}, {freq}, {w_list[iter]}")
 
         osa.aquire_trace()
-        time.sleep(130)
+        time.sleep(80)
         osa.stop_acquire()
         osa.save_data(DATADIR, "_Mira_on", f"signal_{w_list[iter]}", 0, PARAMS, PEAKS)
 

@@ -13,11 +13,11 @@ def main():
         ############### DEFINING AND SAVING PARAMS #######################
         ##################################################################
         CHANNELS = [1 ,2 ,3, 4, 5, 6, 7, 8]
-        TRIGGER = [0.13, 0.13, 0.13, 0.13, 0.13, 0.13, 0.13, 0.12]
-        DELAY = [-3125, -320, -19450, -25770, -23840, -24890, 690, 3080]
+        TRIGGER = [0.11, 0.11, 0.11, 0.11, 0.11, 0.11, 0.11, 0.12]
+        DELAY = [0, -800, -20000, -26200, 0, 400, 24600, 25400]
         tt = TT.Swabian(CHANNELS, TRIGGER, DELAY, "QST", "QST_Double_Layer")
 
-        AQUISITION_TIME = int(30E12) # in picosecond
+        AQUISITION_TIME = int(10E12) # in picosecond
         N_REP = 1
         """
         Defining the coincidence channels we want to save
@@ -35,7 +35,8 @@ def main():
         players = ["arya", "bran", "cersei", "dany"]
 
         # Create new device, Connect, begin polling, and enable
-        arya, bran, cersei, dany = motors_control.players_init(players)
+        # arya, cersei = motors_control.players_init(players=["arya", "cersei"])
+        arya, bran, cersei, dany = motors_control.players_init(players=players, sample=["SQWP1","SHWP","SQWP2"])
 
         # Setting the measurmenet basis we want to measure
         elem_bases = ["x","y","z"]
@@ -45,6 +46,11 @@ def main():
         eff_list = [("z","z","z","z"),("z","a","z","a"),("a","z","a","z"),("a","a","a","a")]
         meas_bases=meas_bases+eff_list
 
+        arya.set_sample_angles([0,0,0])
+        bran.set_sample_angles([0,0,0])
+        cersei.set_sample_angles([0,0,0])
+        dany.set_sample_angles([0,0,0])
+        
         ##########################################################
         ############### START MEASUREMENTS #######################
         ##########################################################
